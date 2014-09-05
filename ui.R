@@ -1,35 +1,35 @@
 library(shiny)
 
 shinyUI(navbarPage("PAM Processor! v0.1",
-                   tabPanel("Welcome",
-                            sidebarLayout(position = "right",
-                                          sidebarPanel( HTML('<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" property="dct:title" rel="dct:type">PAM Processor!</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="www.robtheoceanographer.com" property="cc:attributionName" rel="cc:attributionURL">Robert Johnson</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.')),
-                                          mainPanel(
-                                          h3("WELCOME TO THE WONDERFUL WORLD OF PAM!",align = "center"),
-                                          p("This program is brought to you by Rob Johnson, Shihong Lee, Simon Reeves, and Emma Flukes. We are PhD students at the University of Tasmania and we were fed up with the ridiculous amount of time it was taking to analyse PAM Rapid Light Curves using clunky and expensive stats software (copy... paste... copy... paste... SPSS... boooo!). So, we built the PAM Processor! using the free and open stats scripting language R and the web application tool Shiny.", align = "center"),
-                                          p("At the moment the PAM Processor! v0.1 is only set up for Micro-Algae and can NOT calculate Beta - it basically ignores photoinhibition. We are working on bringing you this, and many more, features in the near future.",align = "center"),
-                                          p('2014 Robert Johnson, Shihong Lee, Simon Reeves, and Emma Flukes.',align = "center"),
-                                          h5("Feedback is appreciated:",align = "center"),
-                                          p(a("Robert Johnson's homepage.", href = "http://www.robtheoceanographer.com"),'Email: robtheoceanographer@gmail.com',align = "center"),
-                                          br(),
-                                          hr(),
-                                          br(),
-                                            h3('PAM PROCESSOR! LICENSE AGREEMENT',align = "center"),
-                                            p('By downloading or using this Software, you agree to be bound by the following legal agreement between you and the creators, and to the creative commons "Attribution-ShareAlike 4.0 International" license.',span("If you do not agree to the terms of this Agreement, do not download or use the Software.", style = "color:blue")),
-                                            h4('1. USE'),
-                                            p('PAM Processor! is allowed to be used free of charge under the creative commons "Attribution-ShareAlike 4.0 International" license, as described on the right of this page.'),
-                                            h4('2. REDISTRIBUTION'),
-                                            p('Redistribution of the PAM Processor! in any medium or format is permitted so long as it is attributed to the original creators (shown below)— You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.'),
-                                            p('ShareAlike — If you remix, transform, or build upon the PAM Processor!, you must distribute your contributions under the same license as the original.'),
-                                            h4('3. WARRANTY DISCLAIMER'),
-                                            p('THE PAM Processor! SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU.  SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.'),
-                                            p('IN NO EVENT WILL Robert Johnson, OR ANY PAM Processor! CREATOR OR COPYRIGHT HOLDER BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, INDIRECT, GENERAL, SPECIAL, EXEMPLARY, INCIDENTAL OR CONSEQUENTIAL DAMAGES HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY ARISING OUT OF THE USE OR INABILITY TO USE THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES, A FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE OR BUSINESS INTERRUPTION).'),
-                                          br(),
-                                          p(a("Shiny's homepage", href = "http://shiny.rstudio.com/"),a(", R's homepage.", href = "http://www.r-project.org/")),
-                                          br()
-                                          )
-                            )
-                   ),
+#                    tabPanel("Welcome",
+#                             sidebarLayout(position = "right",
+#                                           sidebarPanel( HTML('<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" property="dct:title" rel="dct:type">PAM Processor!</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="www.robtheoceanographer.com" property="cc:attributionName" rel="cc:attributionURL">Robert Johnson</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.')),
+#                                           mainPanel(
+#                                           h3("WELCOME TO THE WONDERFUL WORLD OF PAM!",align = "center"),
+#                                           p("This program is brought to you by Rob Johnson, Shihong Lee, Simon Reeves, and Emma Flukes. We are PhD students at the University of Tasmania and we were fed up with the ridiculous amount of time it was taking to analyse PAM Rapid Light Curves using clunky and expensive stats software (copy... paste... copy... paste... SPSS... boooo!). So, we built the PAM Processor! using the free and open stats scripting language R and the web application tool Shiny.", align = "center"),
+#                                           p("At the moment the PAM Processor! v0.1 is only set up for Micro-Algae and can NOT calculate Beta - it basically ignores photoinhibition. We are working on bringing you this, and many more, features in the near future.",align = "center"),
+#                                           p('2014 Robert Johnson, Shihong Lee, Simon Reeves, and Emma Flukes.',align = "center"),
+#                                           h5("Feedback is appreciated:",align = "center"),
+#                                           p(a("Robert Johnson's homepage.", href = "http://www.robtheoceanographer.com"),'Email: robtheoceanographer@gmail.com',align = "center"),
+#                                           br(),
+#                                           hr(),
+#                                           br(),
+#                                             h3('PAM PROCESSOR! LICENSE AGREEMENT',align = "center"),
+#                                             p('By downloading or using this Software, you agree to be bound by the following legal agreement between you and the creators, and to the creative commons "Attribution-ShareAlike 4.0 International" license.',span("If you do not agree to the terms of this Agreement, do not download or use the Software.", style = "color:blue")),
+#                                             h4('1. USE'),
+#                                             p('PAM Processor! is allowed to be used free of charge under the creative commons "Attribution-ShareAlike 4.0 International" license, as described on the right of this page.'),
+#                                             h4('2. REDISTRIBUTION'),
+#                                             p('Redistribution of the PAM Processor! in any medium or format is permitted so long as it is attributed to the original creators (shown below)— You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.'),
+#                                             p('ShareAlike — If you remix, transform, or build upon the PAM Processor!, you must distribute your contributions under the same license as the original.'),
+#                                             h4('3. WARRANTY DISCLAIMER'),
+#                                             p('THE PAM Processor! SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU.  SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.'),
+#                                             p('IN NO EVENT WILL Robert Johnson, OR ANY PAM Processor! CREATOR OR COPYRIGHT HOLDER BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, INDIRECT, GENERAL, SPECIAL, EXEMPLARY, INCIDENTAL OR CONSEQUENTIAL DAMAGES HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY ARISING OUT OF THE USE OR INABILITY TO USE THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES, A FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE OR BUSINESS INTERRUPTION).'),
+#                                           br(),
+#                                           p(a("Shiny's homepage", href = "http://shiny.rstudio.com/"),a(", R's homepage.", href = "http://www.r-project.org/")),
+#                                           br()
+#                                           )
+#                             )
+#                    ),
   
                    
   tabPanel("Load Data",
