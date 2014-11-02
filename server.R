@@ -77,7 +77,8 @@ observe({
   })
 
   PlattFit  <- reactive({
-        pamFIT(reducedLC(),FALSE)
+    # pamFIT(reducedLC(),FALSE)
+    pamFIT(reducedLC(),input$beta)
   })
 
 
@@ -86,13 +87,21 @@ output$fitText1 <- renderText({
     p = PlattFit()
     paste("alpha: ",round(p$A,3))
 })
+
+output$fitText7 <- renderText({
+  p = PlattFit()
+  paste("alpha p value: ",round(p$A_pValue,5))
+})
+
+
   output$fitText2 <- renderText({
   p = PlattFit()
   paste("rETRscaler: ",round(p$rETRscal,3))
 })
+
 output$fitText3 <- renderText({
   p = PlattFit()
-  paste("Beta: ",p$B)
+  paste("Beta: ",round(p$B,4))
 })
 output$fitText4 <- renderText({
   p = PlattFit()
@@ -113,7 +122,7 @@ output$fitText6 <- renderText({
     plot(d$PAR,d$newETR,pch=16,cex=1.5,xlab='PAR',ylab='ETR',col="black")
     text(d$PAR,d$newETR, c(1:nrow(d)),3)
     points(d2$PAR,d2$newETR,pch=16,cex=1.5,col="red")
-    pars2 <-  pamFIT(reducedLC(),FALSE)
+    pars2 <-  pamFIT(reducedLC(),input$beta)
     with(pars2,curve(rETRscal*(1-exp((-A*x)/rETRscal))*exp((-B*x)/rETRscal), add=TRUE, lty=2, lwd=1))
     
   })

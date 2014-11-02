@@ -1,14 +1,13 @@
 # pam helper functions.
 # 
 # rm(list = ls())
-# setwd("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/testData/")
+# setwd("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_dev/codeDevelopment/testData")
 # filename = '01042014_zeroPAR.csv'
 # data = read.csv(filename, sep = ";",header = FALSE)
-# par = read.csv('/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/testData/01042014_PARdata.csv', sep = ",",header = TRUE)
+# par = read.csv('/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_dev/codeDevelopment/testData/01042014_PARdata.csv', sep = ",",header = TRUE)
 
 dataCleanUp <- function(data,par){
   library(functional)
-  
   
   dataM = as.matrix(data[names(data)]) #takes the keys for the list and builds a matrix out of the stupid list. The matrix is a char matrix as we have mixed types within a column (eg numbers and letters).
   DatePos = which(dataM[2,] == 'Date')
@@ -28,6 +27,7 @@ dataCleanUp <- function(data,par){
   #create an empty data.frame
   goodY = matrix(NA, nrow = length(y), ncol = 1)
   
+  # This checks that ther light crurves have got 9 points.
   for (i in 1:length(y)) {
     if((y[i]+8) <= nrow(dataM)){
       if(sum(dataM[(y[i]:(y[i]+8)),TypePos] == c("FO", "F", "F", "F", "F", "F", "F", "F", "F")) == 9){
@@ -36,14 +36,18 @@ dataCleanUp <- function(data,par){
     }
   }
   
-  rm(i, y)
-  Y <- goodY[apply(goodY, 1, Compose(is.finite, all)),]
+  # y is the original position of the FO's and goodY is the position of those that had F0 + 8 rows (eg the light curve is a complete 9 points). It would be good to save this information and print it for some users??
+  y
+  goodY
+  
+  rm(i)
+  Y <- goodY[apply(goodY, 1, Compose(is.finite, all)),] # checks for infinite values where the F0 names occur - eg their indexes.
   
   dataF = data.frame(matrix(NA, nrow = (length(Y)*9), ncol = ncol(dataM)))
   colnames(dataF) = c("Date", "Time", "IDX", "MemNo", "F", "Fm", "PAR","Yield", "ETR")
   
   for(i in 1:length(Y)){
-    if(i ==1){
+    if(i ==1){ # This corrects for the first light curve not starting at row one in the original dataset.
       dataF$Date[i:(i+8)] <- dataM[(Y[i]:(Y[i]+8)),DatePos]
       dataF$Time[i:(i+8)] <- dataM[(Y[i]:(Y[i]+8)),TimePos]
       dataF$IDX[i:(i+8)] <- dataM[(Y[i]:(Y[i]+8)),TypePos]
@@ -95,8 +99,13 @@ dataCleanUp <- function(data,par){
   
   # delete any light curves that have less than 5 points left after cleaning.
   i <- which(dataFIN$IDX == 'FO')
+  # manually check the last curve.
+  if(as.numeric(length(dataFIN$IDX) - i[length(i)] < 6)){
+    dataFIN[i[length(i)]:(length(dataFIN$IDX)),] = NA
+  } 
+# now check the rest of the curves.  
   for(n in 1:(length(i)-1)){
-    if(as.numeric(i[n+1] - i[n]) < 5){
+    if(as.numeric(i[n+1] - i[n]) < 6){
       dataFIN[i[n]:(i[n+1]-1),] = NA
     } 
   }
@@ -201,8 +210,14 @@ dataCleanUp1 <- function(data){
   
   # delete any light curves that have less than 5 points left after cleaning.
   i <- which(dataFIN$IDX == 'FO')
+# manually check the last curve.
+if(as.numeric(length(dataFIN$IDX) - i[length(i)] < 6)){
+  dataFIN[i[length(i)]:(length(dataFIN$IDX)),] = NA
+} 
+# now check the rest of the curves.  
+
   for(n in 1:(length(i)-1)){
-    if(as.numeric(i[n+1] - i[n]) < 5){
+    if(as.numeric(i[n+1] - i[n]) < 6){
       dataFIN[i[n]:(i[n+1]-1),] = NA
     } 
   }
@@ -369,10 +384,11 @@ pamFIT <- function(dataFIN,calcBetaSwitch){
   }
   #print(summary(Platt))
   params = summary(Platt)$"parameters"[,1] #rETRscal, A & B
+  fits = summary(Platt)$"parameters"[,2:4]
   #print(params)
   
-  PFit = data.frame(matrix(NA, nrow = 1, ncol = 7))
-  colnames(PFit)  = c("A","B","rETRscal","rETRmax","Ek","First_MemNo","FvFm")
+  PFit = data.frame(matrix(NA, nrow = 1, ncol = 16))
+  colnames(PFit)  = c("A","A_stdErr","A_tValue","A_pValue","B","B_stdErr","B_tValue","B_pValue","rETRscal","rETRscal_stdErr","rETRscal_tValue","rETRscal_pValue","rETRmax","Ek","First_MemNo","FvFm")
   c = coef(Platt)
   PFit$A = c[2]
   PFit$B = B
@@ -381,7 +397,17 @@ pamFIT <- function(dataFIN,calcBetaSwitch){
   PFit$Ek = as.numeric(PFit$rETRmax/params[2]) # actuallt Ek?
   PFit$First_MemNo = dataFIN$MemNo[1]
   PFit$FvFm = dataFIN$Yield[1]
-    
+  # adding the fit info:
+  PFit$A_stdErr = fits[2,1]
+  PFit$A_tValue = fits[2,2]
+  PFit$A_pValue = fits[2,3]
+  PFit$B_stdErr = fits[3,1]
+  PFit$B_tValue = fits[3,2]
+  PFit$B_pValue = fits[3,3]
+  PFit$rETRscal_stdErr = fits[1,1]
+  PFit$rETRscal_tValue = fits[1,2]
+  PFit$rETRscal_pValue = fits[1,3]
+  
 # plot(I,ETR,pch=16,cex=1.5)
 # pars2<- PFit  
 # with(pars2,curve(rETRscal*(1-exp((-A*x)/rETRscal))*exp((-B*x)/rETRscal), add=TRUE, lty=2, lwd=1))  
