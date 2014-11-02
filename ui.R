@@ -32,7 +32,7 @@ shinyUI(navbarPage("PAM Processor! v0.1",
 #                    ),
   
                    
-  tabPanel("Load Data",
+  tabPanel("Load RAW Data",
   sidebarLayout(
     sidebarPanel(h4('Please load the data you wish to work on in this session:'),
                  fileInput('file1', 'Choose a CSV File',accept=c('text/csv',  'text/comma-separated-values,text/plain', '.csv')),
@@ -41,6 +41,12 @@ shinyUI(navbarPage("PAM Processor! v0.1",
                  br(),
                  h5('If you wish to add new PAR data, you can do that here:'),
                  fileInput('file2', 'Choose a PAR CSV File',accept=c('text/csv',  'text/comma-separated-values,text/plain', '.csv')),                 
+                 hr(),
+                 hr(),
+                 h5("If you want to save the quality controlled dataset for later use, click the download button below:"),
+                 downloadButton('downloadCleanData', 'Download Dataset'),
+                 hr(),
+                 hr(),
                  h5("Feedback is appreciated:"),
                  p("robtheoceanographer@gmail.com")
     ),
@@ -71,7 +77,7 @@ shinyUI(navbarPage("PAM Processor! v0.1",
                                    If you remove data, then points to be used in the analysis will turn red."),
                hr(),
                checkboxInput('beta', 'Calculate Beta?', FALSE),
-               #hr(),
+               hr(),
                h5("When you've finished processing all the RLCs you want then press 'Download' to export your analysis to a file:"),
                downloadButton('downloadData', 'Download'),
                hr(),
@@ -88,6 +94,7 @@ shinyUI(navbarPage("PAM Processor! v0.1",
                h5(textOutput("fitText7")),
                #h5(textOutput("fitText2")),
                h5(textOutput("fitText3")),
+               h5(textOutput("fitText8")),
                h5(textOutput("fitText4")),
                h5(textOutput("fitText5")),
                h5(textOutput("fitText6")),
@@ -101,5 +108,29 @@ shinyUI(navbarPage("PAM Processor! v0.1",
                tags$hr()
              )
            )
-  )
+  ),
+tabPanel("Quenching",
+         sidebarLayout(
+           sidebarPanel(h4('Please load a data file that has already been processed by this software:'),
+                        fileInput('file10', 'Choose a CSV File',accept=c('text/csv',  'text/comma-separated-values,text/plain', '.csv')),
+                        hr(),
+                        h4('Please load the meta-data file that matches to the file loaded above:'),
+                        fileInput('file20', 'Choose a PAR CSV File',accept=c('text/csv',  'text/comma-separated-values,text/plain', '.csv')),                 
+                        hr(),
+                        h5("If you want to save the NPQ dataset, click the download button below:"),
+                        downloadButton('downloadNPQData', 'Download NPQ data'),
+                        hr(),
+                        hr(),
+                        h5("Feedback is appreciated:"),
+                        p("robtheoceanographer@gmail.com")
+           ),
+           mainPanel(
+             tableOutput('contents2')
+            
+           )
+         )
+)
+
+
+
 ))

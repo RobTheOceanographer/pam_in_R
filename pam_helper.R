@@ -6,6 +6,53 @@
 # data = read.csv(filename, sep = ";",header = FALSE)
 # par = read.csv('/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_dev/codeDevelopment/testData/01042014_PARdata.csv', sep = ",",header = TRUE)
 
+# filename = 'QualityControlled_PAM_data_150414.csv_2014-11-02_21-12.csv'
+# metaFilename = 'configFile_1.csv'
+# data = read.csv(filename, sep = ",",header = TRUE)
+# metaData = read.csv(metaFilename, sep = ",",header = TRUE, stringsAsFactors=FALSE)
+
+
+quenchingCalculation <- function(data,metaData){
+  data$ID<- NA
+  data$LightDark <- NA
+  dataNPQout = data.frame(matrix(NA, nrow = (length(data$MemNo)), ncol = 4))
+  colnames(dataNPQout) = c("ID", "Fm", "FmLight", "NPQ")
+  
+  
+  for(i in 1:length(metaData$MemNo)){
+    idx = which(data$MemNo == metaData$MemNo[i])
+    foIndex = which(data$IDX == 'FO')
+    posOfIdx = which(foIndex == idx)
+    if(posOfIdx == length(foIndex)){
+      numbRows = length(data$MemNo) -  foIndex[posOfIdx]  
+      numbRows = numbRows+1
+    }else{
+      numbRows = foIndex[posOfIdx+1] - foIndex[posOfIdx]  
+    }
+    data$ID[foIndex[posOfIdx]:(foIndex[posOfIdx]+(numbRows-1))] = metaData$CurveID[i]
+    data$LightDark[foIndex[posOfIdx]:(foIndex[posOfIdx]+(numbRows-1))] = metaData$Light_Dark[i]
+    dataNPQout$ID[foIndex[posOfIdx]:(foIndex[posOfIdx]+(numbRows-1))] = metaData$CurveID[i]
+  #  dataNPQout$LightDark[foIndex[posOfIdx]:(foIndex[posOfIdx]+(numbRows-1))] = metaData$Light_Dark[i]
+    }
+  rm(i)
+  IDs = unique(data$ID)
+  for(i in 1:length(IDs)){
+      LDataIdx = which(data$ID == IDs[i] & data$LightDark == 'Light')
+      DDataIdx = which(data$ID == IDs[i] & data$LightDark == 'Dark')
+      
+      dataNPQout$NPQ[DDataIdx] = (data$Fm[DDataIdx] - data$Fm[LDataIdx]) / data$Fm[DDataIdx]
+      
+      dataNPQout$Fm[DDataIdx] = data$Fm[DDataIdx] 
+      dataNPQout$FmLight[DDataIdx] = data$Fm[LDataIdx]
+  }
+  dataNPQout = na.omit(dataNPQout)
+  
+  return(dataNPQout)
+}
+  
+
+
+
 dataCleanUp <- function(data,par){
   library(functional)
   
@@ -401,9 +448,15 @@ pamFIT <- function(dataFIN,calcBetaSwitch){
   PFit$A_stdErr = fits[2,1]
   PFit$A_tValue = fits[2,2]
   PFit$A_pValue = fits[2,3]
+if(calcBetaSwitch){
   PFit$B_stdErr = fits[3,1]
   PFit$B_tValue = fits[3,2]
   PFit$B_pValue = fits[3,3]
+}else{
+  PFit$B_stdErr = NA
+  PFit$B_tValue = NA
+  PFit$B_pValue = NA
+}
   PFit$rETRscal_stdErr = fits[1,1]
   PFit$rETRscal_tValue = fits[1,2]
   PFit$rETRscal_pValue = fits[1,3]

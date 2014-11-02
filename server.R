@@ -20,10 +20,31 @@ shinyServer(function(input, output, session) {
       return(dataCleanUp(read.csv(inFile$datapath, sep = ";",header = FALSE),read.csv(inFile2$datapath, sep = ",",header = TRUE)))
     }
       # return(NULL)
-    
-    
-    
   })
+  
+  
+  dataInput2 <- reactive({  
+    input$get
+    inFile10 <- input$file10
+    inFile20 <- input$file20
+    if (is.null(inFile10))
+      return(NULL)
+    if (is.null(inFile20)){
+      return(NULL)
+    } else{
+      return(quenchingCalculation(read.csv(inFile10$datapath, sep = ",",header = TRUE),read.csv(inFile20$datapath, sep = ",",header = TRUE, stringsAsFactors=FALSE)))
+    }
+  })
+  
+  
+  output$contents2 <- renderTable({
+
+    dataInput2()
+  })
+  
+  
+  
+  
   
   output$contents <- renderTable({
     # input$file1 will be NULL initially. After the user selects
@@ -90,9 +111,12 @@ output$fitText1 <- renderText({
 
 output$fitText7 <- renderText({
   p = PlattFit()
-  paste("alpha p value: ",round(p$A_pValue,5))
+  paste("alpha p value: ",round(p$A_pValue,7))
 })
-
+output$fitText8 <- renderText({
+  p = PlattFit()
+  paste("Beta p value: ",round(p$B_pValue,7))
+})
 
   output$fitText2 <- renderText({
   p = PlattFit()
@@ -189,6 +213,23 @@ output$downloadData <- downloadHandler(
     write.csv(pamFinalClean(values), file, row.names=FALSE)
   }
 )
+
+output$downloadCleanData <- downloadHandler(
+  filename = function() {paste('QualityControlled_PAM_data_',result1()$Filename,'_', format(Sys.time(), "%Y-%m-%d_%H-%M"),'.csv',sep="")},
+  content = function(con) {
+    write.csv(dataInput(), con, row.names=FALSE)
+  }
+)
+
+
+output$downloadNPQData <- downloadHandler(
+  filename = function() {paste('NPQ_data_', format(Sys.time(), "%Y-%m-%d_%H-%M"),'.csv',sep="")},
+  content = function(con1) {
+    write.csv(dataInput2(), con1, row.names=FALSE)
+  }
+)
+
+
 
 
   #next thing goes here.  
