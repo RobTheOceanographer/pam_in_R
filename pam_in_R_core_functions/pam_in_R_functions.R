@@ -115,6 +115,7 @@ data_munger <- function(raw_file_data, number_of_light_levels = 9){
       munged_pam_data$ETR[(((i-1)*9)+1):(((i-1)*9)+9)] <- raw_data_matrix[(Y[i]:(Y[i]+8)),ETRPos]
     }
   }
+    
   
   # 10) Removes any extra columns of NA.
   final_munged_pam_data <- munged_pam_data[,colSums(is.na(munged_pam_data))<nrow(munged_pam_data)]
@@ -125,6 +126,35 @@ data_munger <- function(raw_file_data, number_of_light_levels = 9){
   # 12) return the loaded and lightly munged data frame.
   return(final_munged_pam_data)
 }
+
+
+replace_par_values <- function(usable_file, list_of_par_vals){
+  #------------------------------------------------------------------------------------------------------------#
+  # This function replaces the par values throughout an entire file with the 9 values give to it.
+  #
+  # USAGE: replace_par_values(usable_file, list_of_par_vals)
+  #        e.g: list_of_par_vals = c(0, 38, 58, 86, 117, 170, 228, 337, 481)
+  # Expects:
+  #     - that the par values given to it will be 9 lines and that they are to be pasted over the existing data throughout the file.
+  #     
+  #
+  # author: Robert Johnson
+  # version: 0.1
+  # maintainer: Robert Johnson
+  # email: robtheoceanographer@gmail.com
+  # status: Development
+  #
+  # TODO: - add error handling to tell the user what's happening when things break. 
+  #
+  #------------------------------------------------------------------------------------------------------------#
+  indx_of_lcs <- which(usable_file$IDX == 'FO')
+  for(lc in indx_of_lcs){
+    usable_file$PAR[lc:(lc+8)] <- as.numeric(list_of_par_vals)
+  }
+  rm(lc,list_of_par_vals)
+  return(usable_file)
+}
+
 
 
 pam_data_quality_control <- function(usable_file){
@@ -143,7 +173,7 @@ pam_data_quality_control <- function(usable_file){
   # email: robtheoceanographer@gmail.com
   # status: Development
   #
-  # TODO: add error handling to tell the user what's happening when things break.
+  # TODO: - add error handling to tell the user what's happening when things break. 
   #
   #------------------------------------------------------------------------------------------------------------#
   
@@ -153,18 +183,21 @@ pam_data_quality_control <- function(usable_file){
   # There is still some '-' in the dataset that we now need to remove.
   # 2) # finds all FO rows that also have '-' in some columns and replaces them with 0.
   clean_and_usable_file[clean_and_usable_file$IDX == 'FO' & clean_and_usable_file == '-'] = 0 
-  
+    
   # 3) Removes all other rows that have the '-'
   i = which(clean_and_usable_file == '-',arr.ind = TRUE)
   if(length(i) > 0){
-    clean_and_usable_file <- clean_and_usable_file[-(i[,1]),]
+    # We used to delete the rows that had any dashes in them... like this:
+    #clean_and_usable_file <- clean_and_usable_file[-(i[,1]),]
+    # now we will just replace the - with NA... like this:
+    clean_and_usable_file[i] <- NA
   }
   rm(i)
   
   # 4) Delete any light curves that have less than 5 points left after cleaning
   i <- which(clean_and_usable_file$IDX == 'FO')
   if(as.numeric(length(clean_and_usable_file$IDX) - i[length(i)] < 6)){ #checking the last curve first
-    clean_and_usable_file[i[length(i)]:(length(clean_and_usable_file$IDX)),] = NA
+    clean_and_usable_file[i[length(i)]:(length(clean_and_usable_file$IDX)),] = NULL
   } 
   #now check the rest of the curves.
   for(n in 1:(length(i)-1)){
@@ -174,9 +207,10 @@ pam_data_quality_control <- function(usable_file){
   }
   
   # 5) re-check for na's 
-  clean_and_usable_file = na.omit(clean_and_usable_file) 
+  #clean_and_usable_file = na.omit(clean_and_usable_file) 
   
   # 6) check for dodgy strings in the file.
+  clean_and_usable_file$IDX[which(is.na(clean_and_usable_file$IDX))] = 'Z' # convert NA to Z - because of the NA's we've left in until here.
   for(i in 1:length(clean_and_usable_file$IDX)){
     if (clean_and_usable_file$IDX[i] != 'FO' && clean_and_usable_file$IDX[i] != 'F'){
       clean_and_usable_file$IDX[i] <- NA
@@ -199,10 +233,20 @@ pam_data_quality_control <- function(usable_file){
   clean_and_usable_file$ETR = as.numeric(clean_and_usable_file$ETR)
   clean_and_usable_file$currentP <- as.numeric(clean_and_usable_file$PAR)
   
-  # 8) recalculate etr = yield * par
+  
+  # 8) find all the dates that are NA and delete these rows - this is to remove the larger chunks of invalid data.
+  clean_and_usable_file <- clean_and_usable_file[-(which(is.na(clean_and_usable_file$Date))),]  
+  
+  # 9) recalculate etr = yield * par
   P = as.numeric(clean_and_usable_file$PAR) # pull out the par data
   clean_and_usable_file$newETR = as.numeric(clean_and_usable_file$Yield) * P  
   rm(i, n, P)
+  
+  # remove any rows where the F or FO indexi is NA.
+  clean_and_usable_file <- clean_and_usable_file[-(which(is.na(clean_and_usable_file$IDX))),]
+  
+  # 10) if a  new ETR value is NA change the corresponding PAR values to NA so that the nls stuff doesn't fall over later.
+  clean_and_usable_file$PAR[which(is.na(clean_and_usable_file$newETR))] <- NA
   
   return(clean_and_usable_file)
 }
@@ -290,8 +334,8 @@ pam_platt_fit <- function(a_light_curve,calcBetaSwitch = FALSE, maximum_number_i
   #------------------------------------------------------------------------------------------------------------#
   
   # 1) extract the ETR and PAR data for this lc
-  ETR = as.numeric(a_light_curve$newETR)
-  I = as.numeric(a_light_curve$PAR)
+  ETR = na.omit(as.numeric(a_light_curve$newETR))
+  I = na.omit(as.numeric(a_light_curve$PAR))
   
   # 2) define platt et al 1980 eqn. and calculate some initial guesses for the alpha and rETR and Beta
   if(calcBetaSwitch){ # this is for a beta calculation
@@ -303,7 +347,12 @@ pam_platt_fit <- function(a_light_curve,calcBetaSwitch = FALSE, maximum_number_i
   }
   # initial guesses:
   A = mean(c(ETR[2],ETR[3])) / mean(c(I[2],I[3]))
-  rETRscal=as.numeric(mean(c(ETR[which(ETR == max(ETR))],ETR[which(ETR == max(ETR))-1])))
+  
+  # this is the average between the max and the first values... this is how we originally did it.
+  #rETRscal=as.numeric(mean(c(ETR[which(ETR == max(ETR))],ETR[which(ETR == max(ETR))-1]))) 
+  
+  # now trialling the max value.
+  rETRscal=ETR[which(ETR == max(ETR))]
   
   # 3) solve the model using the nonlinear (weighted) least-squares estimate of the parameters of the nonlinear model.
   if(calcBetaSwitch){ #with beta
@@ -321,7 +370,7 @@ pam_platt_fit <- function(a_light_curve,calcBetaSwitch = FALSE, maximum_number_i
   Platt_Fit$A = c[2]
   Platt_Fit$B = B
   Platt_Fit$rETRscal = c[1]
-  Platt_Fit$rETRmax = abs(as.numeric(params[1]*params[2]/(params[2]+abs(0))*(abs(0)/(params[2]+abs(0)))^(abs(0)/params[2])))
+  Platt_Fit$rETRmax = abs(as.numeric(params[1]*params[2]/(params[2]+abs(B))*(abs(B)/(params[2]+abs(B)))^(abs(B)/params[2])))
   Platt_Fit$Ek = as.numeric(Platt_Fit$rETRmax/params[2]) # actuallt Ek?
   Platt_Fit$First_MemNo = a_light_curve$MemNo[1]
   Platt_Fit$FvFm = a_light_curve$Yield[1]

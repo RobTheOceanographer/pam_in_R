@@ -440,7 +440,7 @@ pamFIT <- function(dataFIN,calcBetaSwitch){
   PFit$A = c[2]
   PFit$B = B
   PFit$rETRscal = c[1]
-  PFit$rETRmax = abs(as.numeric(params[1]*params[2]/(params[2]+abs(0))*(abs(0)/(params[2]+abs(0)))^(abs(0)/params[2])))
+  PFit$rETRmax = abs(as.numeric(params[1]*params[2]/(params[2]+abs(B))*(abs(B)/(params[2]+abs(B)))^(abs(B)/params[2])))
   PFit$Ek = as.numeric(PFit$rETRmax/params[2]) # actuallt Ek?
   PFit$First_MemNo = dataFIN$MemNo[1]
   PFit$FvFm = dataFIN$Yield[1]

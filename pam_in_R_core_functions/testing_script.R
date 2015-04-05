@@ -12,16 +12,19 @@
 rm(list = ls())
 
 # 2) set our working directory - eg. this is where the data is.
-setwd("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_rel/testData")
+setwd("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_rel/testData/")
 
 # 3) load in the analysis functions.
-source("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_rel/pam_in_R_package/pam_in_R_functions.R")
+source("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_rel/pam_in_R_core_functions/pam_in_R_functions.R")
 
 # 4) load the data file.
-raw_file_data <- pam_file_reader('T9allsites and Tfinal Mn.csv', your_file_delimiter=';')
+raw_file_data <- pam_file_reader('allsitesT=6.csv', your_file_delimiter=';')
 
 # 5) format the data file.
 usable_file <- data_munger(raw_file_data)
+
+# 5b) optionally replace the par values.
+usable_file <- replace_par_values(usable_file, c(0, 9, 29, 60, 101, 151, 207, 308, 422))
 
 # 6) quality control the data file.
 pam_qc_data <- pam_data_quality_control(usable_file)
@@ -30,17 +33,57 @@ pam_qc_data <- pam_data_quality_control(usable_file)
 the_number_of_light_curves <- how_many_light_curves(pam_qc_data)
 
 # 8) extract a single light curve of your choosing.
-a_light_curve <- extract_a_light_curve(pam_qc_data, 1)
+a_light_curve <- extract_a_light_curve(pam_qc_data, 2)
 
 # 9) do a trial fit and plot up result.
 rm(platt_fit_obj, new) # clean up.
-platt_fit_obj <- pam_platt_fit(a_light_curve,calcBetaSwitch = TRUE, tolerance_level = 3) # do fit
+platt_fit_obj <- pam_platt_fit(a_light_curve,calcBetaSwitch = TRUE, tolerance_level = 0.001, maximum_number_iterations = 10000) # do fit
 platt_fitted_pam_data <- platt_fit_obj$first # extract the fit data
 platt_obj <- platt_fit_obj$second #extract the fit object
-
 plot(a_light_curve$PAR,a_light_curve$newETR,pch=16,cex=1.5) # plot points
-new = data.frame(I = seq(min(a_light_curve$PAR),max(a_light_curve$PAR),len=200)) # create simultaed data to plot line with
+new = data.frame(I = seq(min(na.omit(a_light_curve$PAR)),max(na.omit(a_light_curve$PAR)),len=200)) # create simultaed data to plot line with
 lines(new$I,predict(platt_obj, newdata=new)) # plot a line.
+
+summary(platt_obj)
+
+
+
+
+
+
+################### EXPERIMENTAL WORK BELOW ##########################
+
+# When the max etr value is the second point the fit tends to underestimate.
+# To avoid this we could add some more points between point 1 and 2 that allow the nls algroithm to have something else to pull it back to a nice curve shape?
+
+a_light_curve[10,] <- c("2014-02-02","10:28:01","F",1033,578,1302,10,0.556,3.5,38,5)
+a_light_curve[11,] <- c("2014-02-02","10:28:01","F",1033,578,1302,20,0.556,3.5,38,15)
+
+a_light_curve_temp <- a_light_curve
+a_light_curve_temp[1,] <- a_light_curve[1,]
+a_light_curve_temp[2,] <- c("2014-02-02","10:28:01","F",1033,578,1302,10,0.556,3.5,38,5)
+a_light_curve_temp[3,] <- c("2014-02-02","10:28:01","F",1033,578,1302,20,0.556,3.5,38,15)
+a_light_curve_temp[4,] <- a_light_curve[2,]
+a_light_curve_temp[5,] <- a_light_curve[3,]
+a_light_curve_temp[6,] <- a_light_curve[4,]
+a_light_curve_temp[7,] <- a_light_curve[5,]
+a_light_curve_temp[8,] <- a_light_curve[6,]
+a_light_curve_temp[9,] <- a_light_curve[7,]
+a_light_curve_temp[10,] <- NA
+a_light_curve_temp[11,] <- NA
+
+a_light_curve <- a_light_curve_temp
+
+rm(platt_fit_obj, new) # clean up.
+platt_fit_obj <- pam_platt_fit(a_light_curve,calcBetaSwitch = TRUE, tolerance_level = 0.001) # do fit
+platt_fitted_pam_data <- platt_fit_obj$first # extract the fit data
+platt_obj <- platt_fit_obj$second #extract the fit object
+plot(a_light_curve$PAR,a_light_curve$newETR,pch=16,cex=1.5) # plot points
+new = data.frame(I = seq(0,490,len=200)) # create simultaed data to plot line with
+lines(new$I,predict(platt_obj, newdata=new)) # plot a line.
+
+
+# as you tighten up the tolerance the fit gets better - until it breaks...
 
 
 

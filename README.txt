@@ -18,5 +18,5 @@ Step 2) change the directory to the folder you have the app stored in and then r
 library(shiny)
 rm(list = ls())
 setwd("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/") # this is the folder containing the pam_app folder - not the pam_app folder itself.
-runApp("pam_rel")
+runApp("pam_app")
 
