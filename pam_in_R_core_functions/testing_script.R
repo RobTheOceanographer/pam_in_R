@@ -18,7 +18,7 @@ setwd("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_rel/testData/")
 source("/Users/Rob_MacPro/RobsCodeLibrary/R/PAM_in_R/pam_rel/pam_in_R_core_functions/pam_in_R_functions.R")
 
 # 4) load the data file.
-raw_file_data <- pam_file_reader('allsitesT=6.csv', your_file_delimiter=';')
+raw_file_data <- pam_file_reader('TransPAM(june).csv', your_file_delimiter=';')
 
 # 5) format the data file.
 usable_file <- data_munger(raw_file_data)
@@ -33,21 +33,21 @@ pam_qc_data <- pam_data_quality_control(usable_file)
 the_number_of_light_curves <- how_many_light_curves(pam_qc_data)
 
 # 8) extract a single light curve of your choosing.
-a_light_curve <- extract_a_light_curve(pam_qc_data, 2)
+a_light_curve <- extract_a_light_curve(pam_qc_data, 10)
 
 # 9) do a trial fit and plot up result.
 rm(platt_fit_obj, new) # clean up.
-platt_fit_obj <- pam_platt_fit(a_light_curve,calcBetaSwitch = TRUE, tolerance_level = 0.001, maximum_number_iterations = 10000) # do fit
+platt_fit_obj <- pam_platt_fit(a_light_curve,calcBetaSwitch = TRUE, tolerance_level = 0.0000001, maximum_number_iterations = 1000) # do fit
 platt_fitted_pam_data <- platt_fit_obj$first # extract the fit data
 platt_obj <- platt_fit_obj$second #extract the fit object
 plot(a_light_curve$PAR,a_light_curve$newETR,pch=16,cex=1.5) # plot points
 new = data.frame(I = seq(min(na.omit(a_light_curve$PAR)),max(na.omit(a_light_curve$PAR)),len=200)) # create simultaed data to plot line with
 lines(new$I,predict(platt_obj, newdata=new)) # plot a line.
 
-summary(platt_obj)
+summary(platt_obj) # report this number too: Residual standard error: 0.4338 on 6 degrees of freedom
 
 
-
+# TIX: add a figure download button to the processing page - make the title and savename the "filename_curveNumber_memNumb.png"
 
 
 

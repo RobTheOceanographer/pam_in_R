@@ -231,7 +231,7 @@ pam_data_quality_control <- function(usable_file){
   clean_and_usable_file$PAR = as.numeric(clean_and_usable_file$PAR)
   clean_and_usable_file$Yield = as.numeric(clean_and_usable_file$Yield)
   clean_and_usable_file$ETR = as.numeric(clean_and_usable_file$ETR)
-  clean_and_usable_file$currentP <- as.numeric(clean_and_usable_file$PAR)
+#  clean_and_usable_file$currentP <- as.numeric(clean_and_usable_file$PAR)
   
   
   # 8) find all the dates that are NA and delete these rows - this is to remove the larger chunks of invalid data.
@@ -355,10 +355,15 @@ pam_platt_fit <- function(a_light_curve,calcBetaSwitch = FALSE, maximum_number_i
   rETRscal=ETR[which(ETR == max(ETR))]
   
   # 3) solve the model using the nonlinear (weighted) least-squares estimate of the parameters of the nonlinear model.
+  
   if(calcBetaSwitch){ #with beta
     Platt = nls(PlattEqn, start=c(rETRscal=rETRscal, A=A, B=B), control=nls.control(maxiter = maximum_number_iterations, tol = tolerance_level, minFactor = min_step_size, warnOnly=TRUE));
   }else{ #without beta
     Platt = nls(PlattEqn, start=c(rETRscal=rETRscal, A=A), control=nls.control(maxiter = maximum_number_iterations, tol = tolerance_level, minFactor = min_step_size, warnOnly=TRUE));    
+  }
+
+  if(Platt$convInfo$isConv  == FALSE){
+    return(NULL)
   }
   
   # 4) extract the parameter and fit data from the nls object
@@ -392,6 +397,25 @@ pam_platt_fit <- function(a_light_curve,calcBetaSwitch = FALSE, maximum_number_i
   Platt_Fit$rETRscal_pValue = fits[1,3]
   
   return(list(first=Platt_Fit, second=Platt))
+}
+
+
+
+
+# Shiny App specific functions:
+
+# This is a function for cleaning up and saving the data out of shiny.
+pamFinalClean <- function(data){
+  dataNoNA = na.omit(data) #removes any extra rows of NA
+  finData <<- data.frame("Filename" = NA,"First_MemNo"=NA,"FvFm"=NA,"rETRmax"=NA,"Ek"=NA,"alpha"=NA,"beta"=NA,"rETRscaler"=NA)
+  memNos = unique(dataNoNA$First_MemNo)
+  for(i in 1:length(memNos)){
+    posi = which(dataNoNA$First_MemNo == memNos[i])
+    #if (is.null(posi))
+    #  return(NULL)s
+    finData[i,] = dataNoNA[posi[length(posi)],]
+  }
+  return(finData)
 }
 
 
