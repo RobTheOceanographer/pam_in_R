@@ -61,7 +61,7 @@ shinyUI(
       sidebarLayout(
         sidebarPanel(
           h3("It's PAM Time!"),
-          p("The data presented on the right is the first Rapid Light Curve (RLC) in the file you just loaded. Refine the fit, shown by the dashed line, by removing any crazy outliers (using the box below) and when you're happy with the estimated parameters press 'SAVE' to store those data. To move on to the next RLC just advance the number in the box below. Once you've finished your PAM Processing session you can download the data you've saved by pressing the 'DOWNLOAD' button. I hope you enjoy your PAM Processor! session."),
+          p("The data presented on the right is the first Rapid Light Curve (RLC) in the file you just loaded. Refine the fit, shown by the dashed line, by removing any crazy outliers (using the box below) and adjusting the fit parameters, and when you're happy with the estimated parameters press 'SAVE' to store those data. To move on to the next RLC just advance the number in the box below. Once you've finished your PAM Processing session you can download the data you've saved by pressing the 'DOWNLOAD' button. I hope you enjoy your PAM Processor! session."),
           h5(textOutput("numLCs")),
           hr(),
           h5("Choose a RLC to process:"),
@@ -73,7 +73,7 @@ shinyUI(
           helpText("Note: You can enter one value or a several seperated by a comma (e.g: 9,6,3)",
                    "If you do not enter any values then no points will be removed.
               If you remove data, then points to be used in the analysis will turn red."),
-          h5("Fitting options:"),
+          h5("Fitting parameters:"),
           numericInput('tol', 'The tolerance value for the convergence criterion:', 0.25,min = 0, max = 5, step=0.1),
           numericInput('maxIters', 'The maximum number of iterations allowed.:', 2000, min = 100, max = 10000),
           checkboxInput('beta', 'Calculate Beta?', FALSE),
@@ -103,8 +103,6 @@ shinyUI(
         tags$hr(),
         h3("A print out of the selected Rapid Light Curve data:"),
         tableOutput("currentLC"),
-        h4("This is a quick plot of the raw data - it is here to help you deal with errors above"),
-        plotOutput('plot2'),
         tags$hr()
       )
     )

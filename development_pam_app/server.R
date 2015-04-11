@@ -112,12 +112,14 @@ shinyServer(function(input, output, session) {
   PlattFit  <- reactive({
     # pamFIT(reducedLC(),FALSE)
     # pamFIT(reducedLC(),input$beta)
+    
     platt_fit_obj <- pam_platt_fit(reducedLC(), calcBetaSwitch = input$beta, maximum_number_iterations = input$maxIters, tolerance_level = input$tol)
-    if(is.null(platt_fit_obj)){
-      return(NULL)
-    }
+    
     platt_fitted_pam_data <- platt_fit_obj$first # extract the fit data
     platt_obj <- platt_fit_obj$second #extract the fit object
+    validate(
+      need(platt_obj$convInfo$isConv != FALSE, "No fit found - adjust the fit parameters.")
+    )
     return(platt_fitted_pam_data)
   })
   
@@ -177,13 +179,6 @@ shinyServer(function(input, output, session) {
 #    with(pars2,curve(rETRscal*(1-exp((-A*x)/rETRscal))*exp((-B*x)/rETRscal), add=TRUE, lty=2, lwd=1))
   })
   
-  # plot the original data at the bottom of the page.
-  output$plot2 <- renderPlot({
-    d <- currentLC()
-    plot(d$PAR,d$newETR,pch=16,cex=1.5,main='Original Raw Data',xlab='PAR',ylab='ETR',col="black")  
-  })
-
-
   result1 <- reactive({
     PF <- PlattFit()
     input$get
